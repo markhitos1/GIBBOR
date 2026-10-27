@@ -37,16 +37,56 @@ const nuevoProducto = (nombre, img) => {
 };
 
 
-subirBtn.addEventListener('click', () => {
-  if (nombreInput.value && imgInput.files[0]) {
-    const imgURL = URL.createObjectURL(imgInput.files[0]);
-    nuevoProducto(nombreInput.value, imgURL);
-    nombreInput.value = '';
-    imgInput.value = '';
-    // No borres el formulario, solo limpia los campos
-  } else {
-    alert("Debe ingresar un nombre y seleccionar una imagen.");
-  }
+var nuevaImg = []
+var nuevoNombre = []
+var nuevoResultado = []
+
+subirBtn.addEventListener('click', async (e) => {
+  
+   e.preventDefault();
+   
+   const nombre = nombreInput.value;
+   const imagen = imgInput.files[0];
+   nuevaImg.push(imagen);
+   nuevoNombre.push(nombre);
+    nuevoProducto(nombre, imagen);
+
+  
+  // Creamos el FormData
+  const formData = new FormData();
+  
+  formData.append('nombre', nombre);
+  formData.append('image', imagen);
+  
+  
+  try {
+    
+    const response = await fetch('http://localhost:3000/upload', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const resultado = await response.json();
+    
+    console.log('Respuesta del servidor:', resultado);
+    console.log('URL:', resultado.url);
+    console.log('ID:', resultado.id);
+    
+    // URL que devuelve Cloudinary
+    const imgURL = resultado.url;
+    nuevoResultado.push(imgURL);
+    
+        
+        nombreInput.value = '';
+        imgInput.value = '';
+
+    } catch (error) {
+
+        console.error('Error:', error);
+        alert('No se pudo subir la imagen.');
+
+    }
 });
+
 
 
